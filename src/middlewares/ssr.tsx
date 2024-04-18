@@ -1,12 +1,12 @@
 import { readFileSync } from 'fs'
 import { dirname, resolve } from 'path'
-import React from 'react'
 import { renderToPipeableStream } from 'react-dom/server'
 import { PassThrough } from 'stream'
 import { fileURLToPath } from 'url'
 import { isProduction } from '../constants'
-import { Metadata } from '../types/ssr'
 import { Context } from 'hono'
+import { StaticRouter } from 'react-router-dom/server'
+import { type Metadata } from '../types/ssr'
 
 let manifest: any
 let manifestServer: any
@@ -57,7 +57,7 @@ export const ssrMiddleware = () =>
     const bootstrapModules: string[] = []
 
     let Layout: any
-    let node: any
+    let Component: any
     const entry = getManifestKey(c.req.routePath)
 
     if (isProduction) {
@@ -73,7 +73,7 @@ export const ssrMiddleware = () =>
 
       const { render } = await import(`/build/server/${assetMapServer.file}`)
       Layout = render.Layout
-      node = render.App
+      Component = render.App
 
       const { getInitialProps, getMetadata } = await import(
         `/build/server/${assetMapPage.file}`
@@ -93,7 +93,7 @@ export const ssrMiddleware = () =>
       const { render } = await import(resolve(__dirname, `../../${entry}`))
 
       Layout = render.Layout
-      node = render.App
+      Component = render.App
 
       if (getInitialProps) {
         initialProps = await getInitialProps(c)
@@ -103,17 +103,16 @@ export const ssrMiddleware = () =>
         metadata = await getMetadata(c)
       }
 
-      bootstrapModules.push('src/assets/hmr.ts')
-      bootstrapModules.push(entry)
+      bootstrapModules.push(resolve(__dirname, '../../src/assets/hmr.ts'))
+      bootstrapModules.push(resolve(__dirname, `../../${entry}`))
     }
 
     const { pipe } = renderToPipeableStream(
-      React.createElement(Layout!, {
-        metadata,
-        children: React.createElement(node, {
-          ...initialProps,
-        }),
-      }),
+      <StaticRouter location={c.req.url}>
+        <Layout metadata={metadata}>
+          <Component {...initialProps} />
+        </Layout>
+      </StaticRouter>,
       {
         onShellReady() {
           c.status(200)

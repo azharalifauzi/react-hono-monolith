@@ -3,6 +3,7 @@ import imgUrl from '@/assets/template-5.png'
 import assetUrl from '@/assets/template-5.png?url'
 import React from 'react'
 import { Context } from 'hono'
+import { useLocation, useParams } from 'react-router-dom'
 
 export async function getInitialProps(c: Context) {
   return {
@@ -11,6 +12,11 @@ export async function getInitialProps(c: Context) {
 }
 
 const HomePage: React.FC<{ test: string }> = ({ test }) => {
+  const location = useLocation()
+  const params = useParams()
+
+  console.log({ location, params })
+
   return (
     <div>
       <div className="mb-2">HomePage {test} hmr</div>
