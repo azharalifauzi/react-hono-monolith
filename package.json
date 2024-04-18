@@ -4,7 +4,7 @@
     "build:client": "vite build --ssrManifest --outDir build/client",
     "build:server": "vite build --ssr --outDir build/server",
     "build": "concurrently \"yarn build:client\" \"yarn build:server\"",
-    "preview": "tsx src/index.ts",
+    "preview": "cross-env NODE_ENV=production tsx src/index.ts",
     "preview:local": "cross-env NODE_ENV=production tsx watch --env-file=.env.local src/index.ts"
   },
   "dependencies": {
