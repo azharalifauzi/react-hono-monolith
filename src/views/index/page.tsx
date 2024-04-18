@@ -2,6 +2,13 @@ import { Button } from '@/components/ui/button'
 import imgUrl from '@/assets/template-5.png'
 import assetUrl from '@/assets/template-5.png?url'
 import React from 'react'
+import { Context } from 'hono'
+
+export async function getInitialProps(c: Context) {
+  return {
+    test: 'data',
+  }
+}
 
 const HomePage: React.FC<{ test: string }> = ({ test }) => {
   return (

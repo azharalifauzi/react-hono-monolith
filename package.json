@@ -2,7 +2,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build --ssrManifest --outDir build/client",
-    "build:ssr": "vite build --ssr --outDir build/server",
+    "build:server": "vite build --ssr --outDir build/server",
     "preview": "tsx src/index.ts",
     "preview:local": "tsx watch --env-file=.env.local src/index.ts"
   },

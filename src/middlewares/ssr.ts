@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs'
-import { Context, MiddlewareHandler } from 'hono'
 import { dirname, resolve } from 'path'
 import React from 'react'
 import { renderToPipeableStream } from 'react-dom/server'
@@ -7,6 +6,7 @@ import { PassThrough } from 'stream'
 import { fileURLToPath } from 'url'
 import { isProduction } from '../constants'
 import { Metadata } from '../types/ssr'
+import { Context } from 'hono'
 
 let manifest: any
 let manifestServer: any
@@ -44,45 +44,27 @@ function getManifestKey(routePath: string) {
     return s
   })
 
-  return `src/views${splitted.join('/')}/entry-client.tsx`
+  return `src/views${splitted.join('/')}/entry.tsx`
 }
 
-interface SsrMiddlewareOptions<P extends Record<string, string>> {
-  getInitialProps?: (c: Context) => Promise<P>
-  getMetadata?: (c: Context) => Promise<Metadata>
-}
-
-export const ssrMiddleware = <P extends Record<string, string> = {}>(
-  options: SsrMiddlewareOptions<P> = {}
-): MiddlewareHandler<{
-  Variables: {
-    initialProps: Awaited<P>
-  }
-}> =>
-  async function ssrRenderer(c) {
+export const ssrMiddleware = () =>
+  async function ssrRenderer(c: Context) {
     let metadata: Metadata = {}
-    let initialProps = {} as Awaited<P>
-
-    if (options.getMetadata) {
-      metadata = await options.getMetadata(c)
-    }
-
-    if (options.getInitialProps) {
-      initialProps = (await options.getInitialProps(c)) as Awaited<P>
-    }
+    let initialProps = {} as any
 
     const body = new PassThrough()
 
-    c.set('initialProps', initialProps)
     const bootstrapModules: string[] = []
 
     let Layout: any
     let node: any
-    const entryClient = getManifestKey(c.req.routePath)
+    const entry = getManifestKey(c.req.routePath)
 
     if (isProduction) {
-      const assetMapClient = manifest[entryClient]
-      const assetMapServer = manifestServer[entryClient]
+      const assetMapClient = manifest[entry]
+      const assetMapServer = manifestServer[entry]
+      const assetMapPage =
+        manifestServer[entry.replace('entry.tsx', 'page.tsx')]
       bootstrapModules.push(assetMapClient.file)
       assetMapClient.imports.forEach((key) => {
         const asset = manifest[key]
@@ -92,17 +74,36 @@ export const ssrMiddleware = <P extends Record<string, string> = {}>(
       const { render } = await import(`/build/server/${assetMapServer.file}`)
       Layout = render.Layout
       node = render.App
+
+      const { getInitialProps, getMetadata } = await import(
+        `/build/server/${assetMapPage.file}`
+      )
+      if (getInitialProps) {
+        initialProps = await getInitialProps(c)
+      }
+
+      if (getMetadata) {
+        metadata = await getMetadata(c)
+      }
     } else {
-      node = (
-        await import(
-          resolve(
-            __dirname,
-            `../../${entryClient.replace('entry-client.tsx', 'page.tsx')}`
-          )
-        )
-      ).default
+      const { getInitialProps, getMetadata } = await import(
+        resolve(__dirname, `../../${entry.replace('entry.tsx', 'page.tsx')}`)
+      )
+      const { render } = await import(resolve(__dirname, `../../${entry}`))
+
+      Layout = render.Layout
+      node = render.App
+
+      if (getInitialProps) {
+        initialProps = await getInitialProps(c)
+      }
+
+      if (getMetadata) {
+        metadata = await getMetadata(c)
+      }
+
       bootstrapModules.push('src/assets/hmr.ts')
-      bootstrapModules.push(entryClient)
+      bootstrapModules.push(entry)
     }
 
     const { pipe } = renderToPipeableStream(

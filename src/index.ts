@@ -2,7 +2,7 @@ import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
 import { Hono } from 'hono'
 import { isProduction } from './constants/index.ts'
-import index from './routes/index.tsx'
+import index from './routes'
 
 const app = new Hono()
 
