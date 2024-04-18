@@ -66,4 +66,9 @@ export default defineConfig({
       injectClientScript: false, // This option is buggy, disable it and inject the code manually
     }),
   ],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+    },
+  },
 })

@@ -6,17 +6,27 @@ import { renderToPipeableStream } from 'react-dom/server'
 import { PassThrough } from 'stream'
 import { fileURLToPath } from 'url'
 import { isProduction } from '../constants'
-import DefaultLayout, { DefaultLayoutProps } from '../layouts'
 import { Metadata } from '../types/ssr'
 
 let manifest: any
+let manifestServer: any
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 if (isProduction) {
   manifest = JSON.parse(
-    readFileSync(resolve(__dirname, '../../build/.vite/manifest.json'), 'utf-8')
+    readFileSync(
+      resolve(__dirname, '../../build/client/.vite/manifest.json'),
+      'utf-8'
+    )
+  )
+
+  manifestServer = JSON.parse(
+    readFileSync(
+      resolve(__dirname, '../../build/server/.vite/manifest.json'),
+      'utf-8'
+    )
   )
 }
 
@@ -38,7 +48,6 @@ function getManifestKey(routePath: string) {
 }
 
 interface SsrMiddlewareOptions<P extends Record<string, string>> {
-  layout?: React.FC<DefaultLayoutProps>
   getInitialProps?: (c: Context) => Promise<P>
   getMetadata?: (c: Context) => Promise<Metadata>
 }
@@ -50,7 +59,7 @@ export const ssrMiddleware = <P extends Record<string, string> = {}>(
     initialProps: Awaited<P>
   }
 }> =>
-  async function ssrRenderer(c, next) {
+  async function ssrRenderer(c) {
     let metadata: Metadata = {}
     let initialProps = {} as Awaited<P>
 
@@ -62,51 +71,63 @@ export const ssrMiddleware = <P extends Record<string, string> = {}>(
       initialProps = (await options.getInitialProps(c)) as Awaited<P>
     }
 
+    const body = new PassThrough()
+
     c.set('initialProps', initialProps)
-    c.setRenderer((children) => {
-      const body = new PassThrough()
-      const bootstrapModules: string[] = []
+    const bootstrapModules: string[] = []
 
-      const Layout = options?.layout || DefaultLayout
-      const node = children as React.ReactNode
-      const entryClient = getManifestKey(c.req.routePath)
+    let Layout: any
+    let node: any
+    const entryClient = getManifestKey(c.req.routePath)
 
-      if (isProduction) {
-        const assetMap = manifest[entryClient]
-        bootstrapModules.push(`/build/${assetMap.file}`)
-        assetMap.imports.forEach((key) => {
-          const obj = manifest[key]
-          bootstrapModules.push(`/build/${obj.file}`)
-        })
-      } else {
-        bootstrapModules.push('src/assets/hmr.ts')
-        bootstrapModules.push(entryClient)
-      }
+    if (isProduction) {
+      const assetMapClient = manifest[entryClient]
+      const assetMapServer = manifestServer[entryClient]
+      bootstrapModules.push(assetMapClient.file)
+      assetMapClient.imports.forEach((key) => {
+        const asset = manifest[key]
+        bootstrapModules.push(asset.file)
+      })
 
-      const { pipe } = renderToPipeableStream(
-        React.createElement(Layout, {
-          metadata,
-          children: node,
+      const { render } = await import(`/build/server/${assetMapServer.file}`)
+      Layout = render.Layout
+      node = render.App
+    } else {
+      node = (
+        await import(
+          resolve(
+            __dirname,
+            `../../${entryClient.replace('entry-client.tsx', 'page.tsx')}`
+          )
+        )
+      ).default
+      bootstrapModules.push('src/assets/hmr.ts')
+      bootstrapModules.push(entryClient)
+    }
+
+    const { pipe } = renderToPipeableStream(
+      React.createElement(Layout!, {
+        metadata,
+        children: React.createElement(node, {
+          ...initialProps,
         }),
-        {
-          onShellReady() {
-            c.status(200)
-            pipe(body)
-          },
-          bootstrapModules,
-          bootstrapScriptContent: `window.metadata=${JSON.stringify(
-            metadata
-          )};window.initialProps=${JSON.stringify(initialProps)}`,
-        }
-      )
+      }),
+      {
+        onShellReady() {
+          c.status(200)
+          pipe(body)
+        },
+        bootstrapModules,
+        bootstrapScriptContent: `window.metadata=${JSON.stringify(
+          metadata
+        )};window.initialProps=${JSON.stringify(initialProps)}`,
+      }
+    )
 
-      c.header('Content-Type', 'text/html')
-      c.header('x-content-type-optinos', 'nosniff')
-      c.header('transfer-encoding', 'chunked')
+    c.header('Content-Type', 'text/html')
+    c.header('x-content-type-optinos', 'nosniff')
+    c.header('transfer-encoding', 'chunked')
 
-      // @ts-ignore
-      return c.body(body)
-    })
-
-    return next()
+    // @ts-ignore
+    return c.body(body)
   }

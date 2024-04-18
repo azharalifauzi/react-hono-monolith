@@ -10,9 +10,9 @@ app.route('/', index)
 
 if (isProduction) {
   app.use(
-    '/build/*',
+    '*',
     serveStatic({
-      root: './',
+      root: './build/client',
     })
   )
 }
