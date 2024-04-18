@@ -78,6 +78,7 @@ export const ssrMiddleware = () =>
       const { getInitialProps, getMetadata } = await import(
         `/build/server/${assetMapPage.file}`
       )
+
       if (getInitialProps) {
         initialProps = await getInitialProps(c)
       }

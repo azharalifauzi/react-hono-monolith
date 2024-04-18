@@ -41,9 +41,6 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 4000,
   },
-  ssr: {
-    external: ['react', 'react-dom'],
-  },
   build: {
     outDir: 'build',
     sourcemap: true,
@@ -56,9 +53,16 @@ export default defineConfig(({ mode }) => ({
         assetFileNames: 'static/assets/[name].[ext]',
       },
     },
+    cssMinify: true,
   },
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: [
+          ['@babel/plugin-transform-react-jsx', { runtime: 'automatic' }],
+        ],
+      },
+    }),
     devServer({
       entry: 'src/index.ts',
       exclude: [
