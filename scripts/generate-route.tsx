@@ -77,14 +77,14 @@ export async function createReactRouteRoutes(routePath: Route[]) {
             <App${i}.default />
           </DefaultLayout>
         ),
-        loader: async () => {
+        loader: async (args) => {
           let initialProps: any = {}
           let metadata: any = {}
 
           const app = App${i} as any
 
           if (app.getInitialProps) {
-            initialProps = await app.getInitialProps()
+            initialProps = await app.getInitialProps(args)
           }
 
           if (app.getMetadata) {

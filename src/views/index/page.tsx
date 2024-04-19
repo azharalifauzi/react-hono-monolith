@@ -2,10 +2,9 @@ import { Button } from '@/components/ui/button'
 import imgUrl from '@/assets/template-5.png'
 import assetUrl from '@/assets/template-5.png?url'
 import React from 'react'
-import { Context } from 'hono'
-import { useLoaderData } from 'react-router-dom'
+import { LoaderFunctionArgs, useLoaderData } from 'react-router-dom'
 
-export async function getInitialProps(c: Context) {
+export async function getInitialProps({ params, request }: LoaderFunctionArgs) {
   return {
     test: 'data tst asdf',
   }

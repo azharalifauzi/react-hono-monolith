@@ -1,5 +1,13 @@
 import { Button } from '@/components/ui/button'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, LoaderFunctionArgs, useNavigate } from 'react-router-dom'
+
+export async function getInitialProps({ params, request }: LoaderFunctionArgs) {
+  console.log({ params, request })
+
+  return {
+    test: 'data tst asdf',
+  }
+}
 
 const AboutPage = () => {
   const navigate = useNavigate()
