@@ -1,9 +1,10 @@
-import React from 'react'
+const string = `import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './page'
 import DefaultLayout from '@/layouts'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import routes from '.monrho/routes'
+
+const { routes } = await import('.monrho/routes')
 
 export const render = {
   App,
@@ -20,3 +21,4 @@ if (typeof document !== 'undefined') {
     </React.StrictMode>
   )
 }
+`

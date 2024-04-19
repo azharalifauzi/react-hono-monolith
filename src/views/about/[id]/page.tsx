@@ -1,10 +1,16 @@
-import { useParams } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { Link, useNavigate } from 'react-router-dom'
 
 const AboutPage = () => {
-  const params = useParams()
+  const navigate = useNavigate()
 
-  console.log(params)
-  return <div>About detail</div>
+  return (
+    <div>
+      <div>About detail hmr</div>
+      <Button onClick={() => navigate('/')}> Go to home</Button>
+      <Link to="/">Home</Link>
+    </div>
+  )
 }
 
 export default AboutPage

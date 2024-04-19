@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 import devServer from '@hono/vite-dev-server'
 import { resolve } from 'path'
 import { readdirSync } from 'fs'
+import { run } from 'vite-plugin-run'
 
 function getBuildInput(mode: string) {
   const dirs = readdirSync(resolve(__dirname, './src/views'), {
@@ -32,6 +33,8 @@ function getBuildInput(mode: string) {
       }
     }
   })
+
+  buildInput['.monrho'] = resolve(__dirname, '/.monrho/routes.tsx')
 
   return buildInput
 }
@@ -77,10 +80,27 @@ export default defineConfig(({ mode }) => ({
       ],
       injectClientScript: false, // This option is buggy, disable it and inject the code manually
     }),
+    run([
+      {
+        name: 'generate route',
+        run: ['npx', 'tsx', 'scripts/generate-route.tsx'],
+        startup: true,
+        build: true,
+        pattern: 'src/view/**/*page.tsx',
+      },
+    ]),
   ],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      '.monrho': resolve(__dirname, './.monrho'),
+    },
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis',
+      },
     },
   },
 }))

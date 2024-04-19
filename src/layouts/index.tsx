@@ -1,9 +1,7 @@
-import { Metadata } from '../types/ssr'
 import styles from '@/styles/global.css?inline'
 
 export interface DefaultLayoutProps {
   children?: React.ReactNode
-  metadata?: Metadata
 }
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {

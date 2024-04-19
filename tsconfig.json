@@ -18,9 +18,10 @@
     /* path aliases */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      ".monrho": ["./.monrho"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.png", "**/*.css"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules/**"]
 }

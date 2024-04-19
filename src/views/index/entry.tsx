@@ -2,7 +2,8 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './page'
 import DefaultLayout from '@/layouts'
-import { BrowserRouter } from 'react-router-dom'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import routes from '.monrho/routes'
 
 export const render = {
   App,
@@ -10,17 +11,12 @@ export const render = {
 }
 
 if (typeof document !== 'undefined') {
-  const metadata = window.metadata
-  const initialProps = window.initialProps
+  const router = createBrowserRouter(routes)
 
   ReactDOM.hydrateRoot(
     document,
     <React.StrictMode>
-      <BrowserRouter>
-        <DefaultLayout metadata={metadata}>
-          <App {...initialProps} />
-        </DefaultLayout>
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </React.StrictMode>
   )
 }
