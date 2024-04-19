@@ -6,7 +6,7 @@ const AboutPage = () => {
 
   return (
     <div>
-      <div>About detail hmr</div>
+      <div>About detail hmr ga</div>
       <Button onClick={() => navigate('/')}> Go to home</Button>
       <Link to="/">Home</Link>
     </div>

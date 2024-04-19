@@ -1,7 +1,7 @@
 import fs, { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path, { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { RouteObject } from 'react-router-dom'
+import { deepEqual } from 'fast-equals'
 
 interface Route {
   path: string
@@ -53,8 +53,6 @@ export function getManifestKey(routePath: string) {
 }
 
 export async function createReactRouteRoutes(routePath: Route[]) {
-  const routes: RouteObject[] = []
-
   const imports: string[] = ["import DefaultLayout from '../src/layouts'"]
 
   let i = 0
@@ -67,42 +65,6 @@ export async function createReactRouteRoutes(routePath: Route[]) {
       )}'`
     )
     i++
-
-    // const { getInitialProps, getMetadata } = await import(
-    //   resolve(
-    //     __dirname,
-    //     `../${getManifestKey(path).replace('entry.tsx', 'page.tsx')}`
-    //   )
-    // )
-    // const {
-    //   render: { Layout, App },
-    // } = await import(resolve(__dirname, `../${getManifestKey(path)}`))
-
-    // routes.push({
-    //   path,
-    //   element: (
-    //     <Layout>
-    //       <App />
-    //     </Layout>
-    //   ),
-    //   loader: async () => {
-    //     let initialProps: any = {}
-    //     let metadata: any = {}
-
-    //     if (getInitialProps) {
-    //       initialProps = await getInitialProps()
-    //     }
-
-    //     if (getMetadata) {
-    //       metadata = await getMetadata()
-    //     }
-
-    //     return {
-    //       initialProps,
-    //       metadata,
-    //     }
-    //   },
-    // })
   }
 
   let mainString = `\nconst routes = [
@@ -144,6 +106,7 @@ export async function createReactRouteRoutes(routePath: Route[]) {
     mkdirSync(destination)
   }
 
+  writeFileSync(join(destination, './routes.json'), JSON.stringify(routePath))
   writeFileSync(
     join(destination, './routes.tsx'),
     importString + mainString + '\n export default routes'
@@ -151,4 +114,12 @@ export async function createReactRouteRoutes(routePath: Route[]) {
 }
 
 const routes = getRoutes('src/views')
-await createReactRouteRoutes(routes)
+
+if (existsSync('.monrho/routes.json')) {
+  const existingRoutes = (await import('.monrho/routes.json')).default
+  if (!deepEqual(routes, existingRoutes)) {
+    await createReactRouteRoutes(routes)
+  }
+} else {
+  await createReactRouteRoutes(routes)
+}
