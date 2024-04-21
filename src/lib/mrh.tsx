@@ -11,7 +11,7 @@ import {
   StaticHandlerContext,
   createStaticRouter,
 } from 'react-router-dom/server'
-import { getManifestKey } from '@/utils/ssr'
+import { getManifestKey } from '@/utils/mrh'
 import { RouteObject } from 'react-router-dom'
 
 let manifest: any
@@ -28,15 +28,12 @@ if (isProduction) {
   )
 }
 
-interface SsrMiddlewareOptions {
+interface RenderOptions {
   staticHandler: ReturnType<typeof createStaticHandler>
   routes: RouteObject[]
 }
 
-export const ssrMiddleware = ({
-  routes,
-  staticHandler,
-}: SsrMiddlewareOptions) =>
+export const render = ({ routes, staticHandler }: RenderOptions) =>
   async function ssrRenderer(c: Context) {
     const body = new PassThrough()
 
@@ -50,7 +47,7 @@ export const ssrMiddleware = ({
         bootstrapModules.push('/' + asset.file)
       })
     } else {
-      bootstrapModules.push(resolve(__dirname, '../../src/assets/hmr.ts'))
+      bootstrapModules.push(resolve(__dirname, '../../.mrh/hmr.ts'))
       bootstrapModules.push(resolve(__dirname, `../../${entry}`))
     }
 

@@ -6,6 +6,7 @@ import { createStaticHandler } from 'react-router-dom/server'
 import { readFileSync } from 'fs'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
+import { render } from '@/lib/mrh.tsx'
 
 const app = new Hono({
   strict: false,
@@ -26,6 +27,7 @@ if (isProduction) {
 
   const routesFile = manifestServer['.mrh/routes.tsx'].file
   const exported = await import(
+    /* @vite-ignore */
     resolve(__dirname, `../build/server/${routesFile}`)
   )
 
@@ -43,12 +45,10 @@ if (isProduction) {
 
 const staticHandler = createStaticHandler(routes)
 
-const { ssrMiddleware } = await import('./middlewares/ssr.tsx')
-
 routes.forEach(({ path }) => {
   app.get(
     path,
-    ssrMiddleware({
+    render({
       staticHandler,
       routes,
     })

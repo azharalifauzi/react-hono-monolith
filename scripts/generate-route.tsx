@@ -79,7 +79,7 @@ export async function createReactRouteRoutes(routePath: Route[]) {
         ),
         loader: async (args) => {
           let initialProps: any = {}
-          let metadata: any = {}
+          let metadata: any = []
 
           const app = App${i} as any
 
@@ -88,7 +88,7 @@ export async function createReactRouteRoutes(routePath: Route[]) {
           }
 
           if (app.getMetadata) {
-            initialProps = await app.getMetadata(args)
+            metadata = await app.getMetadata(args)
           }
 
           return { metadata, initialProps }

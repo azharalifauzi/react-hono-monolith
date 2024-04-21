@@ -1,10 +1,3 @@
-declare global {
-  interface Window {
-    initialProps: any
-    metadata: any
-  }
-}
-
 export type Props = {}
 
 declare module 'hono' {
@@ -13,4 +6,8 @@ declare module 'hono' {
   }
 }
 
-export interface Metadata {}
+export interface Metadata {
+  tag?: 'title' | 'meta' | 'link'
+  attrs?: Record<string, string>
+  children?: string
+}

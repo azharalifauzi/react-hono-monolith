@@ -2,23 +2,37 @@ import { Button } from '@/components/ui/button'
 import imgUrl from '@/assets/template-5.png'
 import assetUrl from '@/assets/template-5.png?url'
 import React from 'react'
-import { LoaderFunctionArgs, useLoaderData } from 'react-router-dom'
+import { LoaderFunctionArgs } from 'react-router-dom'
+import { Metadata } from '@/types/mrh'
+import { useLoaderData } from '@/hooks/mrh'
 
-export async function getMetadata({ params, request }: LoaderFunctionArgs) {
-  return {
-    test: 'data tst asdf',
-  }
+export async function getMetadata({
+  params,
+  request,
+}: LoaderFunctionArgs): Promise<Metadata[]> {
+  return [
+    {
+      tag: 'title',
+      children: 'Homepage',
+    },
+    {
+      tag: 'meta',
+      attrs: {
+        property: 'og:title',
+        content: 'Homepage',
+      },
+    },
+  ]
 }
 
 export async function getInitialProps({ params, request }: LoaderFunctionArgs) {
   return {
-    test: 'data tst asdf',
+    test: 'data tst asdf asdf',
   }
 }
 
 const HomePage: React.FC = () => {
-  // @ts-ignore
-  const { initialProps } = useLoaderData()
+  const { initialProps } = useLoaderData<{ test: string }>()
   return (
     <div>
       <div className="mb-2">HomePage {initialProps.test} hmr</div>
