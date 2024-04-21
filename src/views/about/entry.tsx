@@ -3,7 +3,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import routes from '.monrho/routes'
+import routes from '.mrh/routes'
 
 if (typeof document !== 'undefined') {
   const router = createBrowserRouter(routes)

@@ -34,7 +34,7 @@ function getBuildInput(mode: string) {
     }
   })
 
-  buildInput['.monrho'] = resolve(__dirname, '/.monrho/routes.tsx')
+  buildInput['.mrh'] = resolve(__dirname, '/.mrh/routes.tsx')
 
   return buildInput
 }
@@ -100,7 +100,7 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
-      '.monrho': resolve(__dirname, './.monrho'),
+      '.mrh': resolve(__dirname, './.mrh'),
     },
   },
   optimizeDeps: {

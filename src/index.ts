@@ -24,7 +24,7 @@ if (isProduction) {
     )
   )
 
-  const routesFile = manifestServer['.monrho/routes.tsx'].file
+  const routesFile = manifestServer['.mrh/routes.tsx'].file
   const exported = await import(
     resolve(__dirname, `../build/server/${routesFile}`)
   )
@@ -38,7 +38,7 @@ if (isProduction) {
     })
   )
 } else {
-  routes = (await import('.monrho/routes.tsx')).default
+  routes = (await import('.mrh/routes.tsx')).default
 }
 
 const staticHandler = createStaticHandler(routes)

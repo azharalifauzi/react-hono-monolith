@@ -88,7 +88,7 @@ export async function createReactRouteRoutes(routePath: Route[]) {
           }
 
           if (app.getMetadata) {
-            initialProps = await app.getMetadata()
+            initialProps = await app.getMetadata(args)
           }
 
           return { metadata, initialProps }
@@ -100,7 +100,7 @@ export async function createReactRouteRoutes(routePath: Route[]) {
 
   let importString = imports.join('\n')
 
-  const destination = resolve(__dirname, '../.monrho')
+  const destination = resolve(__dirname, '../.mrh')
 
   if (!existsSync(destination)) {
     mkdirSync(destination)
@@ -115,8 +115,8 @@ export async function createReactRouteRoutes(routePath: Route[]) {
 
 const routes = getRoutes('src/views')
 
-if (existsSync('.monrho/routes.json')) {
-  const existingRoutes = (await import('.monrho/routes.json')).default
+if (existsSync('.mrh/routes.json')) {
+  const existingRoutes = (await import('.mrh/routes.json')).default
   if (!deepEqual(routes, existingRoutes)) {
     await createReactRouteRoutes(routes)
   }

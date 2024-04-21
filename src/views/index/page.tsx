@@ -4,6 +4,12 @@ import assetUrl from '@/assets/template-5.png?url'
 import React from 'react'
 import { LoaderFunctionArgs, useLoaderData } from 'react-router-dom'
 
+export async function getMetadata({ params, request }: LoaderFunctionArgs) {
+  return {
+    test: 'data tst asdf',
+  }
+}
+
 export async function getInitialProps({ params, request }: LoaderFunctionArgs) {
   return {
     test: 'data tst asdf',
