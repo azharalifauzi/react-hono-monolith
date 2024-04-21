@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import imgUrl from '@/assets/template-5.png'
 import assetUrl from '@/assets/template-5.png?url'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { LoaderFunctionArgs } from 'react-router-dom'
 import { Metadata } from '@/types/mrh'
 import { useLoaderData } from '@/hooks/mrh'
@@ -33,6 +33,7 @@ export async function getInitialProps({ params, request }: LoaderFunctionArgs) {
 
 const HomePage: React.FC = () => {
   const { initialProps } = useLoaderData<{ test: string }>()
+
   return (
     <div>
       <div className="mb-2">HomePage {initialProps.test} hmr</div>

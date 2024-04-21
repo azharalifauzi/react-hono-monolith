@@ -46,6 +46,10 @@ if (isProduction) {
 const staticHandler = createStaticHandler(routes)
 
 routes.forEach(({ path }) => {
+  if (['*', '/_error', '/_404'].includes(path)) {
+    return
+  }
+
   app.get(
     path,
     render({
@@ -53,6 +57,18 @@ routes.forEach(({ path }) => {
       routes,
     })
   )
+})
+
+app.notFound(async (c) => {
+  if (c.req.method === 'GET') {
+    return render({
+      routes,
+      staticHandler,
+      notFound: true,
+    })(c)
+  }
+
+  return c.json({ data: 'Endpoint Not found' })
 })
 
 export default app

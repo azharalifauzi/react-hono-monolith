@@ -31,14 +31,26 @@ if (isProduction) {
 interface RenderOptions {
   staticHandler: ReturnType<typeof createStaticHandler>
   routes: RouteObject[]
+  notFound?: boolean
+  isError?: boolean
 }
 
-export const render = ({ routes, staticHandler }: RenderOptions) =>
+export const render = ({
+  routes,
+  staticHandler,
+  notFound,
+  isError,
+}: RenderOptions) =>
   async function ssrRenderer(c: Context) {
     const body = new PassThrough()
 
     const bootstrapModules: string[] = []
-    const entry = getManifestKey(c.req.routePath)
+    let entry = getManifestKey(c.req.path)
+    if (notFound) {
+      entry = 'src/views/_404/entry.tsx'
+    } else if (isError) {
+      entry = 'src/views/_error/entry.tsx'
+    }
 
     if (isProduction) {
       const assetMapClient = manifest[entry]

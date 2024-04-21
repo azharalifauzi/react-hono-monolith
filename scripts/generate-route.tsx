@@ -67,6 +67,11 @@ export async function createReactRouteRoutes(routePath: Route[]) {
     i++
   }
 
+  const notFoundIndex =
+    routePath.findIndex(({ path }) => path.includes('404')) || 0
+  const defaultErrorIndex =
+    routePath.findIndex(({ path }) => path.includes('_error')) || 0
+
   let mainString = `\nconst routes = [
     ${routePath
       .map(({ path }, i) => {
@@ -92,11 +97,44 @@ export async function createReactRouteRoutes(routePath: Route[]) {
           }
 
           return { metadata, initialProps }
-        }
+        },
+        errorElement: (() => {
+          const App = App${i} as any
+          return (App as any)?.ErrorBoundary ? 
+            <App.ErrorBoundary /> : 
+            <App${defaultErrorIndex}.default />
+        })()
+          
       }`
       })
-      .join(',\n')}
-]`
+      .join(',\n')}`
+
+  mainString += `,{
+        path: '*',
+        element: (
+          <DefaultLayout>
+            <App${notFoundIndex}.default />
+          </DefaultLayout>
+        ),
+        loader: async (args) => {
+          let initialProps: any = {}
+          let metadata: any = []
+
+          const app = App${notFoundIndex} as any
+
+          if (app.getInitialProps) {
+            initialProps = await app.getInitialProps(args)
+          }
+
+          if (app.getMetadata) {
+            metadata = await app.getMetadata(args)
+          }
+
+          return { metadata, initialProps }
+        }
+      },\n`
+
+  mainString += ']'
 
   let importString = imports.join('\n')
 

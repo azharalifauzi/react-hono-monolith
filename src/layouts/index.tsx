@@ -2,6 +2,7 @@ import { useLoaderData } from '@/hooks/mrh'
 import styles from '@/styles/global.css?inline'
 import { Metadata } from '@/types/mrh'
 import { createElement } from 'react'
+import { useRouteError } from 'react-router-dom'
 
 export interface DefaultLayoutProps {
   children?: React.ReactNode
@@ -56,13 +57,19 @@ function generateMeta(metadata: Metadata[]) {
 }
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
-  const { metadata = [] } = useLoaderData()
+  const error = useRouteError()
+
+  let data: ReturnType<typeof useLoaderData> | undefined
+
+  if (!error) {
+    data = useLoaderData() || {}
+  }
 
   return (
     <html>
       <head>
         <meta charSet="UTF-8" />
-        {generateMeta(metadata)}
+        {data && generateMeta(data.metadata)}
         <style dangerouslySetInnerHTML={{ __html: styles }}></style>
       </head>
       <body>{children}</body>
